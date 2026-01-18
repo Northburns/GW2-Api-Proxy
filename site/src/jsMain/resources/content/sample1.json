@@ -1,0 +1,219 @@
+{
+  "_": "Document",
+  ">": [
+    {
+      "_": "Heading",
+      "level": 1,
+      "anchorRefId": "",
+      ">": [
+        {
+          "_": "Text",
+          "text": "Hello world!"
+        }
+      ]
+    },
+    {
+      "_": "Paragraph",
+      "text": "",
+      "lineIndents": [
+        0
+      ],
+      "isTrailingBlankLine": true,
+      "hasTableSeparator": false,
+      ">": [
+        {
+          "_": "Text",
+          "text": "This is a list:"
+        }
+      ]
+    },
+    {
+      "_": "BulletList",
+      "openingMarker": "*",
+      ">": [
+        {
+          "_": "BulletListItem",
+          "openingMarker": "*",
+          "markerSuffix": "",
+          "tight": true,
+          "hadBlankAfterItemParagraph": false,
+          "containsBlankLine": false,
+          "priority": -2147483648,
+          ">": [
+            {
+              "_": "Paragraph",
+              "text": "",
+              "lineIndents": [
+                0
+              ],
+              "isTrailingBlankLine": false,
+              "hasTableSeparator": false,
+              ">": [
+                {
+                  "_": "Text",
+                  "text": "List item 1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_": "BulletListItem",
+          "openingMarker": "*",
+          "markerSuffix": "",
+          "tight": true,
+          "hadBlankAfterItemParagraph": true,
+          "containsBlankLine": false,
+          "priority": -2147483648,
+          ">": [
+            {
+              "_": "Paragraph",
+              "text": "",
+              "lineIndents": [
+                0
+              ],
+              "isTrailingBlankLine": true,
+              "hasTableSeparator": false,
+              ">": [
+                {
+                  "_": "Text",
+                  "text": "list item 2"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_": "Heading",
+      "level": 2,
+      "anchorRefId": "",
+      ">": [
+        {
+          "_": "Text",
+          "text": "Formatting "
+        },
+        {
+          "_": "StrongEmphasis",
+          "text": "in",
+          ">": [
+            {
+              "_": "Text",
+              "text": "in"
+            }
+          ]
+        },
+        {
+          "_": "Text",
+          "text": " heading"
+        }
+      ]
+    },
+    {
+      "_": "Paragraph",
+      "text": "",
+      "lineIndents": [
+        0
+      ],
+      "isTrailingBlankLine": true,
+      "hasTableSeparator": false,
+      ">": [
+        {
+          "_": "Text",
+          "text": "How "
+        },
+        {
+          "_": "Emphasis",
+          "text": "about",
+          ">": [
+            {
+              "_": "Text",
+              "text": "about"
+            }
+          ]
+        },
+        {
+          "_": "Text",
+          "text": " some formatting!"
+        }
+      ]
+    },
+    {
+      "_": "MacroBlock",
+      "macroContent": "This is a macro block\r\n",
+      ">": [
+        {
+          "_": "Macro",
+          "name": "whaa",
+          "macroContent": "",
+          ">": [
+            {
+              "_": "MacroAttribute",
+              "attribute": "nice",
+              "separator": "",
+              "value": ""
+            },
+            {
+              "_": "MacroAttribute",
+              "attribute": "stuff",
+              "separator": "",
+              "value": ""
+            }
+          ]
+        },
+        {
+          "_": "Paragraph",
+          "text": "",
+          "lineIndents": [
+            0
+          ],
+          "isTrailingBlankLine": false,
+          "hasTableSeparator": false,
+          ">": [
+            {
+              "_": "Text",
+              "text": "This is a macro block"
+            }
+          ]
+        },
+        {
+          "_": "MacroClose",
+          "name": "whaa"
+        }
+      ]
+    },
+    {
+      "_": "Paragraph",
+      "text": "",
+      "lineIndents": [
+        0
+      ],
+      "isTrailingBlankLine": false,
+      "hasTableSeparator": false,
+      ">": [
+        {
+          "_": "Text",
+          "text": "This here is an inline macro "
+        },
+        {
+          "_": "Macro",
+          "name": "whaa",
+          "macroContent": "",
+          ">": [
+            {
+              "_": "MacroAttribute",
+              "attribute": "g",
+              "separator": "=",
+              "value": "1"
+            },
+            {
+              "_": "Text",
+              "text": ", so cool!"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

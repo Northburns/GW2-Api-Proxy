@@ -6,6 +6,9 @@ logback = "1.4.14"
 kvision = "9.3.0"
 gw2api = "0.10.0"
 flexmark = "0.64.8"
+napier = "2.7.1"
+juul-indexeddb= "0.11.0"
+kottage = "1.10.0"
 
 [libraries]
 ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
@@ -19,15 +22,20 @@ ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-gw2api = { module= "com.gw2tb.gw2api:api-client", version.ref = "gw2api" }
-gw2api-ktor = { module= "com.gw2tb.gw2api:api-client-ktor", version.ref = "gw2api" }
+gw2api = { module = "com.gw2tb.gw2api:api-client", version.ref = "gw2api" }
+gw2api-ktor = { module = "com.gw2tb.gw2api:api-client-ktor", version.ref = "gw2api" }
 
-kvision = { module = "io.kvision:kvision", version.ref= "kvision"}
-kvision-bootstrap = { module = "io.kvision:kvision-bootstrap", version.ref= "kvision"}
-kvision-i18n = { module = "io.kvision:kvision-i18n", version.ref= "kvision"}
-kvision-testutils = { module = "io.kvision:kvision-testutils", version.ref= "kvision"}
+kvision = { module = "io.kvision:kvision", version.ref = "kvision" }
+kvision-bootstrap = { module = "io.kvision:kvision-bootstrap", version.ref = "kvision" }
+kvision-i18n = { module = "io.kvision:kvision-i18n", version.ref = "kvision" }
+kvision-testutils = { module = "io.kvision:kvision-testutils", version.ref = "kvision" }
 
-flexmark-java = { module = "com.vladsch.flexmark:flexmark-java", version.ref = "flexmark"}
+flexmark-java = { module = "com.vladsch.flexmark:flexmark-java", version.ref = "flexmark" }
+
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+
+juul-indexeddb = {module="com.juul.indexeddb:core", version.ref="juul-indexeddb"}
+kottage = { module="io.github.irgaly.kottage:kottage", version.ref="kottage"}
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

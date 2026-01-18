@@ -1,0 +1,20 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  PB_ZIP: https://github.com/pocketbase/pocketbase/releases/download/v0.36.0/pocketbase_0.36.0_windows_amd64.zip
+
+tasks:
+  default:
+    cmds:
+      - echo "Hello"
+    silent: true
+
+  download-pb:
+    status:
+      - test -f pocketbase.exe
+    cmds:
+      - curl -L {{.PB_ZIP}} -o pb.zip
+      - defer: rm pb.zip
+      - tar -xf pb.zip pocketbase.exe

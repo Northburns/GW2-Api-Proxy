@@ -1,0 +1,31 @@
+{
+  "_": "Document",
+  ">": [
+    {
+      "_": "Heading",
+      "level": 1,
+      "anchorRefId": "",
+      ">": [
+        {
+          "_": "Text",
+          "text": "Hoijoijoi"
+        }
+      ]
+    },
+    {
+      "_": "Paragraph",
+      "text": "",
+      "lineIndents": [
+        0
+      ],
+      "isTrailingBlankLine": false,
+      "hasTableSeparator": false,
+      ">": [
+        {
+          "_": "Text",
+          "text": "Foo"
+        }
+      ]
+    }
+  ]
+}
