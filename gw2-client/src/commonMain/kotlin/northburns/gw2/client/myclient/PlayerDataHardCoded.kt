@@ -8,7 +8,7 @@ object PlayerDataHardCoded {
         AKI to PlayerData(
             AKI,
             "Aki",
-            PlayerApiKey("")
+            PlayerApiKey(" ")
         ),
         MARIA to PlayerData(
             MARIA,

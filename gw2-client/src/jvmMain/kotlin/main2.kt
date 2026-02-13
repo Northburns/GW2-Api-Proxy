@@ -14,12 +14,14 @@ import northburns.gw2.client.myclient.PlayerId
 import northburns.gw2.client.myclient.cache.MyCacheFactory
 import northburns.gw2.client.myclient.gw2e.Gw2eAccountSnapshot
 import northburns.gw2.client.myclient.snapshot.AccountSnapshotService
+import kotlin.time.Duration.Companion.days
 
 fun main() = runBlocking {
     val cacheFactory = MyCacheFactory(this)
     val cache = cacheFactory.create<String, Gw2eAccountSnapshot>(
         PlayerDataHardCoded.playerData(PlayerId("aki")),
         "joku-polku-yesssss",
+        999.days,
     )
 
     // TOSI NOPEE TESTI että onnaaks GW2Efficiency'n snapshotien haku.
