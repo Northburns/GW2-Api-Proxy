@@ -2,22 +2,24 @@ package northburns.gw2.client.myclient
 
 object PlayerDataHardCoded {
 
+    val AKI = PlayerId("aki")
+    val MARIA = PlayerId("maria")
     val playerData = mapOf(
-        PlayerId("aki") to PlayerData(
-            PlayerId("aki"),
+        AKI to PlayerData(
+            AKI,
             "Aki",
-            PlayerApiKey("5CA7C4ED-5981-8247-A3ED-6FE2C9680F79426E1575-53CE-4179-BEB5-F9698734B362")
+            PlayerApiKey("")
         ),
-        PlayerId("maria") to PlayerData(
-            PlayerId("maria"),
+        MARIA to PlayerData(
+            MARIA,
             "Maria",
-            PlayerApiKey("C9DBE2D5-0CEC-C64D-A41A-434FFF63F59F6C0389B4-5B4D-4ADF-A873-17D9F37D39E8")
+            PlayerApiKey("")
         ),
     )
 
     val playerIds = listOf(
-        PlayerId("aki"),
-        PlayerId("maria"),
+        AKI,
+        MARIA,
     )
 
     fun playerData(id: PlayerId): PlayerData {

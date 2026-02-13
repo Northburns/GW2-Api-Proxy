@@ -1,15 +1,13 @@
 package northburns.gw2.client.myclient
 
-import com.gw2tb.gw2api.client.Gw2ApiClient
 import com.gw2tb.gw2api.client.RequestTemplate
 import com.gw2tb.gw2api.client.getOrThrow
-import kotlin.text.get
 
 /**
  */
 class EndpointSimplePaged<T>(
-    private val client: Gw2ApiClient,
-    private val template: (page: Int, pageSize: Int?) -> RequestTemplate<List<T>>,
+    private val client: Gw2ApiClientWrapper,
+    private val template: (Long, Long?) -> RequestTemplate<List<T>>,
 ) {
 
     suspend fun get(): List<T> {
@@ -20,15 +18,15 @@ class EndpointSimplePaged<T>(
     }
 
     companion object {
-        private const val PAGE_SIZE = 200
+        private const val PAGE_SIZE = 200L
 
         suspend fun <V> getPaged(
-            client: Gw2ApiClient,
-            byPage: (page: Int, pageSize: Int?) -> RequestTemplate<List<V>>,
+            client: Gw2ApiClientWrapper,
+            byPage: (Long, Long?) -> RequestTemplate<List<V>>,
         ): List<V> {
             val values = mutableListOf<V>()
 
-            var page = 0
+            var page = 0L
             do {
                 val response = client.executeAsync(byPage(page, PAGE_SIZE))
                 values.addAll(response.decodingResult.getOrThrow())

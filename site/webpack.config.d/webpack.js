@@ -7,7 +7,11 @@ if (config.devServer) {
     config.devServer.open = false;
     config.devServer.port = 3000;
     config.devServer.historyApiFallback = true;
-    config.devtool = 'eval-cheap-source-map';
+
+    // FAST:
+    // config.devtool = 'eval-cheap-source-map';
+    // Slow?:
+    config.devtool = "eval-source-map";
 } else {
     config.devtool = undefined;
 }

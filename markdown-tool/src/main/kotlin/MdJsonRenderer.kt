@@ -217,8 +217,11 @@ class MdJsonRenderer : IRender {
             is Array<*> -> JsonArray(this.map { it?.renderAny() ?: JsonNull })
             is IntArray -> JsonArray(this.map { it.renderAny() })
             is Iterable<*> -> JsonArray(this.map { it?.renderAny() ?: JsonNull })
-            is Map<*, *> -> JsonObject(this.mapKeys { (k, _) -> k!!.asString() }
-                .mapValues { (_, v) -> v?.renderAny() ?: JsonNull }.cleanup())
+            is Map<*, *> -> JsonObject(
+                this
+                .mapKeys { (k, _) -> k?.asString() ?: "null" }
+                .mapValues { (_, v) -> v?.renderAny() ?: JsonNull }.cleanup()
+            )
 
             is SubSequence -> this.asString().renderAny()
             is BasedSequence -> this.asString().renderAny()

@@ -119,6 +119,7 @@ import com.gw2tb.gw2api.types.v2.GW2v2WizardsVaultListing
 import com.gw2tb.gw2api.types.v2.GW2v2WizardsVaultObjective
 import com.gw2tb.gw2api.types.v2.GW2v2World
 import com.gw2tb.gw2api.types.v2.GW2v2WorldBoss
+import kotlinx.coroutines.CoroutineScope
 
 /**
  *
@@ -174,6 +175,7 @@ interface MyGw2Client {
         val homeNodes: EndpointEntity<GW2HomeInstanceNodeId, GW2v2HomeInstanceNode>
         val finishers: EndpointEntity<GW2FinisherId, GW2v2Finisher>
         val items: EndpointEntity<GW2ItemId, GW2v2Item>
+
         // TODO val itemStats: AsyncCache<GW2ItemStatsId, GW2v2ItemStats>
         val materials: EndpointEntity<GW2MaterialId, GW2v2MaterialCategory>
         val recipes: EndpointEntity<GW2RecipeId, GW2v2Recipe>
@@ -181,6 +183,7 @@ interface MyGw2Client {
         val colors: EndpointEntity<GW2ColorId, GW2v2Color>
         val dailyCrafting: EndpointEntity<String, GW2v2DailyCrafting>
         val dungeons: EndpointEntity<GW2DungeonId, GW2v2Dungeon>
+
         // TODO val files: AsyncCache<GW2CommonAssetId, GW2v2CommonAsset>
         val novelties: EndpointEntity<GW2NoveltyId, GW2v2Novelty>
         val quaggans: EndpointEntity<GW2QuagganId, GW2v2Quaggan>
@@ -189,7 +192,7 @@ interface MyGw2Client {
         val worlds: EndpointEntity<GW2WorldId, GW2v2World>
         val backstoryAnswers: EndpointEntity<GW2BackstoryAnswerId, GW2v2BackstoryAnswer>
         val backstoryQuestions: EndpointEntity<GW2BackstoryQuestionId, GW2v2BackstoryQuestion>
-        val quests: EndpointEntity<Int, GW2v2Quest>
+        val quests: EndpointEntity<Long, GW2v2Quest>
         val stories: EndpointEntity<GW2StoryId, GW2v2Story>
         val storiesSeasons: EndpointEntity<GW2StorySeasonId, GW2v2StorySeason>
         val currencies: EndpointEntity<GW2CurrencyId, GW2v2Currency>
@@ -256,6 +259,7 @@ interface MyGw2Client {
         val mountsTypes: EndpointSimple<List<GW2MountTypeId>>
         val novelties: EndpointSimple<List<GW2NoveltyId>>
         val outfits: EndpointSimple<List<GW2OutfitId>>
+
         // TODO val progression: AsyncLazy<Collection<AccountProgression>>
         val pvpHeroes: EndpointSimple<List<GW2PvpHeroId>>
         val raids: EndpointSimple<List<GW2RaidId>>
@@ -300,12 +304,12 @@ interface MyGw2Client {
 //    }
 
     companion object {
-        fun create() : MyGw2Client {
-            return  MyGw2ClientImpl({
+        fun create(scope : CoroutineScope): MyGw2Client {
+            return MyGw2ClientImpl({
                 PlayerDataHardCoded.playerData(
                     it
                 )
-            })
+            }, scope = scope)
         }
     }
 

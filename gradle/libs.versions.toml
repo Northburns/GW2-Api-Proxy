@@ -1,16 +1,26 @@
 [versions]
-kotlin = "2.3.0"
+kotlin = "2.3.10"
+coroutines = "1.10.2"
 kotlinx-serialization = "1.9.0"
-ktor = "3.3.2"
+kotlinTime = "0.7.1"
+ktor = "3.4.0"
 logback = "1.4.14"
-kvision = "9.3.0"
-gw2api = "0.10.0"
+kvision = "9.3.1"
+gw2api = "0.11.0"
 flexmark = "0.64.8"
 napier = "2.7.1"
-juul-indexeddb= "0.11.0"
-kottage = "1.10.0"
+juul-indexeddb = "0.11.0"
+kottage = "1.11.0"
+arrow = "2.2.1.1"
 
 [libraries]
+kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlin-coroutines-debug = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-debug", version.ref = "coroutines" }
+kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinTime" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+# OMG! https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-debug
+
 ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 ktor-server-resources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor" }
@@ -20,7 +30,13 @@ ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor"
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+ktor-client-engine-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 gw2api = { module = "com.gw2tb.gw2api:api-client", version.ref = "gw2api" }
 gw2api-ktor = { module = "com.gw2tb.gw2api:api-client-ktor", version.ref = "gw2api" }
@@ -28,14 +44,24 @@ gw2api-ktor = { module = "com.gw2tb.gw2api:api-client-ktor", version.ref = "gw2a
 kvision = { module = "io.kvision:kvision", version.ref = "kvision" }
 kvision-bootstrap = { module = "io.kvision:kvision-bootstrap", version.ref = "kvision" }
 kvision-i18n = { module = "io.kvision:kvision-i18n", version.ref = "kvision" }
+kvision-navigo = { module = "io.kvision:kvision-routing-navigo-ng", version.ref = "kvision" }
+kvision-redux = { module = "io.kvision:kvision-redux-kotlin", version.ref = "kvision" }
+kvision-pace = { module = "io.kvision:kvision-pace", version.ref = "kvision" }
+kvision-chart = { module = "io.kvision:kvision-chart", version.ref = "kvision" }
+kvision-tabulator = { module = "io.kvision:kvision-tabulator", version.ref = "kvision" }
+kvision-state = { module = "io.kvision:kvision-state", version.ref = "kvision" }
+kvision-icons-fontawesome = { module = "io.kvision:kvision-fontawesome", version.ref = "kvision" }
+kvision-icons-bootstrap = { module = "io.kvision:kvision-bootstrap-icons", version.ref = "kvision" }
 kvision-testutils = { module = "io.kvision:kvision-testutils", version.ref = "kvision" }
+
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 
 flexmark-java = { module = "com.vladsch.flexmark:flexmark-java", version.ref = "flexmark" }
 
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
-juul-indexeddb = {module="com.juul.indexeddb:core", version.ref="juul-indexeddb"}
-kottage = { module="io.github.irgaly.kottage:kottage", version.ref="kottage"}
+juul-indexeddb = { module = "com.juul.indexeddb:core", version.ref = "juul-indexeddb" }
+kottage = { module = "io.github.irgaly.kottage:kottage", version.ref = "kottage" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

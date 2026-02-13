@@ -12,5 +12,6 @@ object Gw2Json  {
         prettyPrintIndent = "  "
         classDiscriminator = "type"
         explicitNulls = false
+        ignoreUnknownKeys = true
     }
 }

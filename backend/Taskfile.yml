@@ -8,8 +8,15 @@ vars:
 tasks:
   default:
     cmds:
-      - echo "Hello"
+      - task: run-pb
     silent: true
+
+  run-pb:
+    deps: [ download-pb ]
+    cmds:
+      - cmd /C pocketbase.exe superuser upsert admin@test.com password
+      - cmd /C pocketbase.exe superuser upsert northburns@gmail.com password
+      - cmd /C pocketbase.exe serve --http 127.0.0.1:8090
 
   download-pb:
     status:

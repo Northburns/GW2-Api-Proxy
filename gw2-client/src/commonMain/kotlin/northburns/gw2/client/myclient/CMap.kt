@@ -8,7 +8,10 @@ class CMap<K, V> private constructor(
     private val m: MutableMap<K, V> = mutableMapOf(),
 ) {
 
-    fun getValue(key: K): V = requireNotNull(get(key))
+    fun getValue(key: K): V = requireNotNull(get(key)) {
+        "CMap doesn't have key: $key"
+    }
+
     fun get(key: K): V? {
         if (!m.containsKey(key)) {
             val value = calc(key)

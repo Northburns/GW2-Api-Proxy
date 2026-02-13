@@ -1,28 +1,26 @@
 package northburns.gw2.client.myclient.cache
 
-import northburns.gw2.client.myclient.Gw2Json
+import northburns.gw2.client.myclient.snapshot.AccountSnapshot
 
 interface MyCache<K, V> {
 
-    fun getKnownKeys(): Set<K>
+    suspend fun getKnownKeys(): Set<K>
 
     /**
      * Returns false, until <setKnownKeys> is called at least once.
      */
-    fun isAllKeysKnown(): Boolean
-    fun setKnownKeys(ks: Set<K>)
+    suspend fun isAllKeysKnown(): Boolean
+    suspend fun setKnownKeys(ks: Set<K>)
 
+    suspend fun hasKey(k : K): Boolean
 
-    fun putAll(vs: Map<K, V>)
+    suspend fun put(k: K, v: V)
+    suspend fun putAll(vs: Map<K, V>)
 
-    fun getMany(ks: Collection<K>): Map<K, V>
+    suspend fun get(k: K): V?
+    suspend fun getMany(ks: Collection<K>): Map<K, V>
+    suspend fun getOrCalc(k: K, calc: suspend () -> V?): V?
 
-    companion object {
-        fun <K,V> create(v: V): MyCache<K, V> {
-            Gw2Json.json.encodeToString(v)
-            return MyCacheImpl()
-        }
-    }
-
-
+    suspend fun purgeAll()
+    suspend fun purgeExpiredEntries()
 }

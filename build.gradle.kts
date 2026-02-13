@@ -47,7 +47,7 @@ version = "0.0.1"
             //implementation("io.kvision:kvision-testutils:$kvisionVersion")
         }
         jvmMain.dependencies {
-            implementation("io.ktor:ktor-client-apache5:3.3.2")
+            implementation("io.ktor:ktor-client-apache5:3.4.0")
             //implementation(kotlin("stdlib-jdk8"))
         }
     }

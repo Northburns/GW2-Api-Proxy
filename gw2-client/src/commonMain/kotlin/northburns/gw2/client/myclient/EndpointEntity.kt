@@ -1,18 +1,18 @@
 package northburns.gw2.client.myclient
 
-import com.gw2tb.gw2api.client.Gw2ApiClient
 import com.gw2tb.gw2api.client.RequestTemplate
 import com.gw2tb.gw2api.client.getOrThrow
+import northburns.gw2.client.myclient.cache.MyCache
 
 /**
  * TODO implement caching logic!
  */
 class EndpointEntity<K, V>(
-    private val client: Gw2ApiClient,
+    private val client: Gw2ApiClientWrapper,
     private val cache: MyCache<K, V>,
     private val allIds: RequestTemplate<List<K>>,
     private val byIds: (List<K>) -> RequestTemplate<List<V>>,
-    private val byPage: (page: Int, pageSize: Int?) -> RequestTemplate<List<V>>,
+    private val byPage: (Long, Long?) -> RequestTemplate<List<V>>,
     private val getId: (V) -> K?,
 ) {
 
@@ -21,7 +21,7 @@ class EndpointEntity<K, V>(
         else {
             val ids = client.executeAsync(allIds).decodingResult.getOrThrow().toSet()
             cache.setKnownKeys(ids)
-            return ids;
+            ids;
         }
     }
 
@@ -50,7 +50,8 @@ class EndpointEntity<K, V>(
 
     private fun valuesToMap(values: List<V>): Map<K, V> {
         return values.associateBy { v ->
-            requireNotNull(getId(v))
+            @Suppress("RedundantRequireNotNullCall")
+            requireNotNull(getId(v)) { "Can't extract key from: $v" }
         }
     }
 
