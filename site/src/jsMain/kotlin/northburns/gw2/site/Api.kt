@@ -1,5 +1,6 @@
 package northburns.gw2.site
 
+import com.gw2tb.gw2api.types.GW2ItemId
 import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.plugins.*
@@ -10,6 +11,9 @@ import io.ktor.serialization.kotlinx.json.*
 import io.kvision.core.StringPair
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import northburns.gw2.client.myclient.MyGw2Client
@@ -18,7 +22,11 @@ import northburns.gw2.client.myclient.PlayerId
 import northburns.gw2.client.myclient.cache.MyCacheFactory
 import northburns.gw2.client.myclient.snapshot.AccountSnapshot.AccountSnapshotId
 import northburns.gw2.client.myclient.snapshot.AccountSnapshotService
+import northburns.gw2.client.myclient.utils.chunked
+import northburns.gw2.site.state.GoonAction
+import northburns.gw2.site.state.GoonState
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 
 class Api(scope: CoroutineScope) {
 
@@ -67,90 +75,25 @@ class Api(scope: CoroutineScope) {
         return v
     }
 
-    // ============================================================================================
+    // Actual operations
 
-    private fun authRequest(): List<StringPair> {
-        return emptyList()
+    private val itemRequestChannel = Channel<GW2ItemId>(Channel.UNLIMITED)
+    private val channels = Gw2GoonManager.launch {
+        itemRequestChannel.consumeAsFlow()
+            .chunked(1_000.milliseconds)
+            .collect { itemIds ->
+                if (itemIds.isNotEmpty()) {
+                    fetchItemsBatch(itemIds.distinct())
+                }
+            }
     }
 
-    suspend fun login(email: String?, password: String?): User {
-        return User("user1")
+    fun requestItem(itemId: GW2ItemId) {
+        itemRequestChannel.trySend(itemId)
     }
 
-    suspend fun register(username: String?, email: String?, password: String?): User {
-        return User("user1")
+    private suspend fun fetchItemsBatch(itemIds: List<GW2ItemId>) {
+        val items = client.general.items.getMany(itemIds)
+        Gw2GoonManager.goonStore.dispatch(GoonAction.FetchItemsSuccess(items.values))
     }
-
-    suspend fun user(): User {
-        return User("user1")
-    }
-
-    suspend fun settings(image: String?, username: String?, bio: String?, email: String?, password: String?): User {
-        return User("user1")
-    }
-
-    suspend fun tags(): List<String> {
-        return emptyList()
-    }
-
-    suspend fun articles(
-        tag: String?,
-        author: String?,
-        favorited: String?,
-        offset: Int = 0,
-        limit: Int = 10
-    ): ArticlesDto {
-        return ArticlesDto(emptyList())
-    }
-
-    suspend fun feed(offset: Int = 0, limit: Int = 10): ArticlesDto {
-        return ArticlesDto(emptyList())
-    }
-
-    suspend fun article(slug: String): Article {
-        return Article("article1", User("user1"))
-    }
-
-    suspend fun articleComments(slug: String): List<Comment> {
-        return emptyList()
-    }
-
-    suspend fun articleComment(slug: String, comment: String?): Comment {
-        return Comment(1)
-    }
-
-    suspend fun articleCommentDelete(slug: String, id: Int) {
-    }
-
-    suspend fun articleFavorite(slug: String, favorite: Boolean = true): Article {
-        return Article("article1", User("user1"))
-    }
-
-    suspend fun profile(username: String): User {
-        return User("user1")
-    }
-
-    suspend fun profileFollow(username: String, follow: Boolean = true): User {
-        return User("user1")
-    }
-
-    suspend fun createArticle(title: String?, description: String?, body: String?, tags: List<String>): Article {
-        return Article("article1", User("user1"))
-    }
-
-    suspend fun updateArticle(
-        slug: String,
-        title: String?,
-        description: String?,
-        body: String?,
-        tags: List<String>
-    ): Article {
-        return Article("article1", User("user1"))
-    }
-
-    suspend fun deleteArticle(slug: String) {
-
-    }
-
-
 }

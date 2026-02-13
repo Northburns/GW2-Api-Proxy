@@ -24,7 +24,7 @@ class Gw2GoonNavigation {
             .notFound({ goonStore.dispatch(NavigationAction(Gw2GoonView.ErrorView("Unexpected path."))) })
             .resolve()
 
-        routing.navigate("")
+        //routing.navigate("")
     }
 
     fun navigateTo(view: Gw2GoonView) {
