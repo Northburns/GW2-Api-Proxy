@@ -1,17 +1,23 @@
 [versions]
 kotlin = "2.3.10"
+gradle-versions = "0.53.0"
 coroutines = "1.10.2"
-kotlinx-serialization = "1.9.0"
+kotlinx-serialization = "1.10.0"
+kotlin-wrappers = "2026.3.3"
 kotlinTime = "0.7.1"
 ktor = "3.4.0"
 logback = "1.4.14"
-kvision = "9.3.1"
-gw2api = "0.11.0"
+kvision = "9.4.0"
+gw2api = "0.12.0"
 flexmark = "0.64.8"
 napier = "2.7.1"
 juul-indexeddb = "0.11.0"
-kottage = "1.11.0"
+#kottage = "1.11.0"
+store = "5.0.0"
 arrow = "2.2.1.1"
+kotlinpoet = "2.2.0"
+ksp = "2.3.6"
+jetbrains-markdown = "0.7.3"
 
 [libraries]
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -20,6 +26,10 @@ kotlin-coroutines-debug = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-d
 kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinTime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 # OMG! https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-debug
+
+kotlin-wrapper-browser = { module = "org.jetbrains.kotlin-wrappers:kotlin-browser", version.ref = "kotlin-wrappers" }
+
+jetbrains-markdown = { module = "org.jetbrains:markdown", version.ref = "jetbrains-markdown" }
 
 ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
@@ -43,6 +53,7 @@ gw2api-ktor = { module = "com.gw2tb.gw2api:api-client-ktor", version.ref = "gw2a
 
 kvision = { module = "io.kvision:kvision", version.ref = "kvision" }
 kvision-bootstrap = { module = "io.kvision:kvision-bootstrap", version.ref = "kvision" }
+kvision-tailwindcss = { module = "io.kvision:kvision-tailwindcss", version.ref = "kvision" }
 kvision-i18n = { module = "io.kvision:kvision-i18n", version.ref = "kvision" }
 kvision-navigo = { module = "io.kvision:kvision-routing-navigo-ng", version.ref = "kvision" }
 kvision-redux = { module = "io.kvision:kvision-redux-kotlin", version.ref = "kvision" }
@@ -55,13 +66,21 @@ kvision-icons-bootstrap = { module = "io.kvision:kvision-bootstrap-icons", versi
 kvision-testutils = { module = "io.kvision:kvision-testutils", version.ref = "kvision" }
 
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
+arrow-serialization = { module = "io.arrow-kt:arrow-core-serialization", version.ref = "arrow" }
+arrow-optics = { module = "io.arrow-kt:arrow-optics", version.ref = "arrow" }
+arrow-optics-ksp = { module = "io.arrow-kt:arrow-optics-ksp-plugin", version.ref = "arrow" }
 
 flexmark-java = { module = "com.vladsch.flexmark:flexmark-java", version.ref = "flexmark" }
 
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 juul-indexeddb = { module = "com.juul.indexeddb:core", version.ref = "juul-indexeddb" }
-kottage = { module = "io.github.irgaly.kottage:kottage", version.ref = "kottage" }
+#kottage = { module = "io.github.irgaly.kottage:kottage", version.ref = "kottage" }
+store = { module = "org.mobilenativefoundation.store:store5", version.ref = "store" }
+store-cache = { module = "org.mobilenativefoundation.store:cache5", version.ref = "store" }
+
+kotlinpoet = { group = "com.squareup", name = "kotlinpoet-ksp", version.ref = "kotlinpoet" }
+squareup-ksp = { group = "com.google.devtools.ksp", name = "symbol-processing-api", version.ref = "ksp" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -69,4 +88,5 @@ kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization"
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kvision = { id = "io.kvision", version.ref = "kvision" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
-
+gradle-versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-versions" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

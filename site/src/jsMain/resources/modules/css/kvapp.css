@@ -1,1 +1,24 @@
+@import "tailwindcss";
+
+
+.profession-icon-color-shadow {
+    --profession-color: black;
+    --shadow-length: 1px;
+    filter: brightness(30%)
+            saturate(0)
+            drop-shadow(calc(-1 * var(--shadow-length)) calc(-1 * var(--shadow-length)) var(--profession-color))
+            drop-shadow(          var(--shadow-length)  calc(-1* var(--shadow-length))  var(--profession-color))
+            drop-shadow(calc(-1 * var(--shadow-length))          var(--shadow-length)   var(--profession-color))
+            drop-shadow(          var(--shadow-length)           var(--shadow-length)   var(--profession-color));
+}
+
+/*
+ * Google Fonts
+ */
+
+.limelight-regular {
+  font-family: "Limelight", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
 

@@ -1,3 +1,6 @@
+gw2-client/cache-gw2e-snapshots/*
+
+
 .kotlin/
 .gradle/
 build/

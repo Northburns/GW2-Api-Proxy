@@ -1,11 +1,15 @@
 package northburns.gw2.client.myclient
 
+import com.gw2tb.gw2api.client.AuthenticationStrategy
+import com.gw2tb.gw2api.client.UnsafeQueryAuthentication
 import com.gw2tb.gw2api.client.ktor.buildGw2ApiClient
 import kotlinx.coroutines.CoroutineScope
+import northburns.gw2.client.myclient.CMap.Companion.create
 import northburns.gw2.client.myclient.cache.MyCacheFactory
+import northburns.gw2.client2.PlayerDataProvider
 
 class MyGw2ClientImpl(
-    playerInfo: (PlayerId) -> PlayerData,
+    playerData: PlayerDataProvider,
     /**
      * Cache instances are closed when this completes
      */
@@ -17,21 +21,26 @@ class MyGw2ClientImpl(
      */
     private val client = Gw2ApiClientWrapper(buildGw2ApiClient {
         json = Gw2Json.json
+
+        // To make browser not send preflight requests - which are explicitly not supported by the API
+        // TODO do this only if targeting browserJS
+        @OptIn(UnsafeQueryAuthentication::class)
+        authenticationStrategy = AuthenticationStrategy.QUERY
     })
 
     private val cf = MyCacheFactory(scope)
 
-    private val api = CMap.Companion.create<PlayerId?, ApiImplementation>({ playerId ->
-        ApiImplementation(client, playerId?.let(playerInfo), cf)
-    })
+    private val api = create<PlayerId?, ApiImplementation> { playerId: PlayerId? ->
+        ApiImplementation(client, playerId, playerData, cf)
+    }
 
     override val general: MyGw2Client.ApiGeneral = api.getValue(null).apiGeneral
     override val mapInformation: MyGw2Client.ApiMapInformation = api.getValue(null).apiMapInformation
     override val authenticated: CMap<PlayerId, MyGw2Client.ApiAuthenticated> =
-        CMap.Companion.create { api.getValue(it).apiAuthenticated }
+        create { api.getValue(it).apiAuthenticated }
     override val tradingPost: MyGw2Client.ApiTradingPost = api.getValue(null).apiTradingPost
     override val tradingPostAuthenticated: CMap<PlayerId, MyGw2Client.ApiTradingPostAuthenticated> =
-        CMap.Companion.create { api.getValue(it).apiTradingPostAuthenticated }
+        create { api.getValue(it).apiTradingPostAuthenticated }
 
     override suspend fun invalidatePlayerCaches() {
         val x: List<com.gw2tb.gw2api.types.GW2GuildId>

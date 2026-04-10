@@ -1,16 +1,16 @@
 package northburns.gw2.site.layout
 
-import com.gw2tb.gw2api.types.GW2ItemId
 import io.kvision.core.Container
-import io.kvision.html.div
-import io.kvision.html.span
-import northburns.gw2.site.layout.components.ItemComponent
+import io.kvision.html.p
+import northburns.gw2.site.layout.components.TextWithIcon
 
 fun Container.home() {
-    div {
-        span("hello home kt!")
-    }
-    div {
-        ItemComponent(GW2ItemId(103815)).also { add(it) }
+    p {
+        +"Welcome to my site! You can find "
+        TextWithIcon(text="AAA").also { add(it) }
+        +" and "
+        TextWithIcon(text="BBB", href = "https://google.com").also { add(it) }
+        +" and "
+        TextWithIcon(text="CCC", href = "https://google.com", external = true).also { add(it) }
     }
 }

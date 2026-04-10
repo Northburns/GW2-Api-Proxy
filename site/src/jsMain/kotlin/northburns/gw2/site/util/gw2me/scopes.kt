@@ -1,0 +1,18 @@
+package northburns.gw2.site.util.gw2me
+
+const val Scope_Identify: Scope = "identify"
+const val Scope_Email: Scope = "email"
+const val Scope_Accounts: Scope = "accounts"
+const val Scope_Accounts_Verified: Scope = "accounts.verified"
+const val Scope_Accounts_DisplayName: Scope = "accounts.displayName"
+const val Scope_GW2_Account: Scope = "gw2:account"
+const val Scope_GW2_Inventories: Scope = "gw2:inventories"
+const val Scope_GW2_Characters: Scope = "gw2:characters"
+const val Scope_GW2_Tradingpost: Scope = "gw2:tradingpost"
+const val Scope_GW2_Wallet: Scope = "gw2:wallet"
+const val Scope_GW2_Unlocks: Scope = "gw2:unlocks"
+const val Scope_GW2_Pvp: Scope = "gw2:pvp"
+const val Scope_GW2_Wvw: Scope = "gw2:wvw"
+const val Scope_GW2_Builds: Scope = "gw2:builds"
+const val Scope_GW2_Progression: Scope = "gw2:progression"
+const val Scope_GW2_Guilds: Scope = "gw2:guilds"

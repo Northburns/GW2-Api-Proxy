@@ -1,0 +1,12 @@
+{
+  "northburns": {
+    "name": "Northburns",
+    "emoji": "🧙‍♂️",
+    "order": 1
+  },
+  "orvokkia": {
+    "name": "Orvokkia",
+    "emoji": "🐲",
+    "order": 2
+  }
+}

@@ -132,7 +132,13 @@ import kotlinx.coroutines.CoroutineScope
  * * PVP, don't have time for this at the moment...
  * * WVW, don't have time for this at the moment...
  * * "/v2/commerce/exchange/coins", "/v2/commerce/exchange/gems": require quantity param
+ *
+ *
  */
+@Deprecated(
+    message = "The newer implementation has less self-maintained code, and embraces coroutines better.",
+    replaceWith = ReplaceWith("MyGw2Client2")
+)
 interface MyGw2Client {
 
     val general: ApiGeneral
@@ -245,7 +251,7 @@ interface MyGw2Client {
         val gliders: EndpointSimple<List<GW2GliderId>>
         val homeCats: EndpointSimple<List<GW2HomeInstanceCatId>>
         val homeNodes: EndpointSimple<List<GW2HomeInstanceNodeId>>
-        val inventory: EndpointSimple<List<GW2v2AccountInventorySlot>>
+        val inventory: EndpointSimple<List<GW2v2AccountInventorySlot?>>
         val jadebots: EndpointSimple<List<GW2JadeBotId>>
         val legendaryArmory: EndpointSimple<List<GW2v2AccountLegendaryArmoryUnlock>>
         val luck: EndpointSimple<List<GW2v2Luck>>
@@ -304,12 +310,10 @@ interface MyGw2Client {
 //    }
 
     companion object {
-        fun create(scope : CoroutineScope): MyGw2Client {
-            return MyGw2ClientImpl({
-                PlayerDataHardCoded.playerData(
-                    it
-                )
-            }, scope = scope)
+        fun create(scope: CoroutineScope): MyGw2Client {
+            return MyGw2ClientImpl(
+                TODO("PlayerDataRead.playerData( it )")
+            , scope = scope)
         }
     }
 

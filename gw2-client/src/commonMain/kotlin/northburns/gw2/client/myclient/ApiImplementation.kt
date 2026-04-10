@@ -303,18 +303,21 @@ import com.gw2tb.gw2api.types.v2.GW2v2WizardsVaultListing
 import com.gw2tb.gw2api.types.v2.GW2v2WizardsVaultObjective
 import com.gw2tb.gw2api.types.v2.GW2v2World
 import com.gw2tb.gw2api.types.v2.GW2v2WorldBoss
+import kotlinx.serialization.json.JsonElement
 import northburns.gw2.client.myclient.MyGw2Client.ApiAuthenticated
 import northburns.gw2.client.myclient.MyGw2Client.ApiGeneral
 import northburns.gw2.client.myclient.MyGw2Client.ApiMapInformation
 import northburns.gw2.client.myclient.MyGw2Client.ApiTradingPost
 import northburns.gw2.client.myclient.MyGw2Client.ApiTradingPostAuthenticated
 import northburns.gw2.client.myclient.cache.MyCacheFactory
+import northburns.gw2.client2.PlayerDataProvider
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 class ApiImplementation(
     client: Gw2ApiClientWrapper,
-    private val player: PlayerData?,
+    private val playerId: PlayerId?,
+    private val playerData: PlayerDataProvider,
     private val cf: MyCacheFactory,
 ) {
 
@@ -322,11 +325,14 @@ class ApiImplementation(
     private val ef = EndpointFactory(
         client,
         RequestConfigurer {
-            player?.key?.key?.also { key -> withAPIKey(key) }
+            playerId?.let { playerData.getPlayerKey(it) }?.key?.also { key ->
+                withAPIKey(key)
+            }
         },
     )
 
-    val cacheEntryTtl = if(player != null) 5.minutes else 3650.days
+    val cacheEntryTtl = if (playerId != null) 5.minutes else 3650.days
+    val cacheSimple = cf.create<String, JsonElement>(playerId, "simple", cacheEntryTtl)
 
     val apiGeneral: ApiGeneral = ApiGeneralImpl()
     val apiMapInformation: ApiMapInformation = ApiMapInformationImpl()
@@ -335,9 +341,9 @@ class ApiImplementation(
     val apiAuthenticated: ApiAuthenticated = ApiAuthenticatedImpl()
 
     private inner class ApiGeneralImpl : ApiGeneral {
-        override val build = ef.simple(::gw2v2Build)
+        override val build = ef.simple(cacheSimple, ::gw2v2Build)
         override val achievements: EndpointEntity<GW2AchievementId, GW2v2Achievement> = ef.entity(
-            cache = cf.create(player, "achievements", cacheEntryTtl),
+            cache = cf.create(playerId, "achievements", cacheEntryTtl),
             allIds = ::gw2v2AchievementsIds,
             byIds = ::gw2v2AchievementsByIds,
             byPage = ::gw2v2AchievementsByPage,
@@ -345,280 +351,280 @@ class ApiImplementation(
         )
         override val achievementsCategories: EndpointEntity<GW2AchievementCategoryId, GW2v2AchievementCategory> =
             ef.entity(
-                cache = cf.create(player, "achievements/categories", cacheEntryTtl),
+                cache = cf.create(playerId, "achievements/categories", cacheEntryTtl),
                 allIds = ::gw2v2AchievementsCategoriesIds,
                 byIds = ::gw2v2AchievementsCategoriesByIds,
                 byPage = ::gw2v2AchievementsCategoriesByPage,
                 getId = GW2v2AchievementCategory::id,
             )
         override val achievementsGroups: EndpointEntity<GW2AchievementGroupId, GW2v2AchievementGroups> = ef.entity(
-            cache = cf.create(player, "achievements/groups", cacheEntryTtl),
+            cache = cf.create(playerId, "achievements/groups", cacheEntryTtl),
             allIds = ::gw2v2AchievementsGroupsIds,
             byIds = ::gw2v2AchievementsGroupsByIds,
             byPage = ::gw2v2AchievementsGroupsByPage,
             getId = GW2v2AchievementGroups::id,
         )
         override val mapChests: EndpointEntity<String, GW2v2MapChest> = ef.entity(
-            cache = cf.create(player, "mapchests", cacheEntryTtl),
+            cache = cf.create(playerId, "mapchests", cacheEntryTtl),
             allIds = ::gw2v2MapChestsIds,
             byIds = ::gw2v2MapChestsByIds,
             byPage = ::gw2v2MapChestsByPage,
             getId = GW2v2MapChest::id,
         )
         override val worldBosses: EndpointEntity<GW2WorldBossId, GW2v2WorldBoss> = ef.entity(
-            cache = cf.create(player, "worldbosses", cacheEntryTtl),
+            cache = cf.create(playerId, "worldbosses", cacheEntryTtl),
             allIds = ::gw2v2WorldBossesIds,
             byIds = ::gw2v2WorldBossesByIds,
             byPage = ::gw2v2WorldBossesByPage,
             getId = GW2v2WorldBoss::id,
         )
         override val jadeBots: EndpointEntity<GW2JadeBotId, GW2v2JadeBot> = ef.entity(
-            cache = cf.create(player, "jadebots", cacheEntryTtl),
+            cache = cf.create(playerId, "jadebots", cacheEntryTtl),
             allIds = ::gw2v2JadeBotsIds,
             byIds = ::gw2v2JadeBotsByIds,
             byPage = ::gw2v2JadeBotsByPage,
             getId = GW2v2JadeBot::id,
         )
         override val legendaryArmory: EndpointEntity<GW2ItemId, GW2v2LegendaryArmorySlot> = ef.entity(
-            cache = cf.create(player, "legendaryarmory", cacheEntryTtl),
+            cache = cf.create(playerId, "legendaryarmory", cacheEntryTtl),
             allIds = ::gw2v2LegendaryArmoryIds,
             byIds = ::gw2v2LegendaryArmoryByIds,
             byPage = ::gw2v2LegendaryArmoryByPage,
             getId = GW2v2LegendaryArmorySlot::id,
         )
         override val legends: EndpointEntity<GW2LegendId, GW2v2Legend> = ef.entity(
-            cache = cf.create(player, "legends", cacheEntryTtl),
+            cache = cf.create(playerId, "legends", cacheEntryTtl),
             allIds = ::gw2v2LegendsIds,
             byIds = ::gw2v2LegendsByIds,
             byPage = ::gw2v2LegendsByPage,
             getId = GW2v2Legend::id,
         )
         override val masteries: EndpointEntity<GW2MasteryId, GW2v2Mastery> = ef.entity(
-            cache = cf.create(player, "masteries", cacheEntryTtl),
+            cache = cf.create(playerId, "masteries", cacheEntryTtl),
             allIds = ::gw2v2MasteriesIds,
             byIds = ::gw2v2MasteriesByIds,
             byPage = ::gw2v2MasteriesByPage,
             getId = GW2v2Mastery::id,
         )
         override val minis: EndpointEntity<GW2MiniId, GW2v2Mini> = ef.entity(
-            cache = cf.create(player, "minis", cacheEntryTtl),
+            cache = cf.create(playerId, "minis", cacheEntryTtl),
             allIds = ::gw2v2MinisIds,
             byIds = ::gw2v2MinisByIds,
             byPage = ::gw2v2MinisByPage,
             getId = GW2v2Mini::id,
         )
         override val mountsSkins: EndpointEntity<GW2MountSkinId, GW2v2MountSkin> = ef.entity(
-            cache = cf.create(player, "mounts/skins", cacheEntryTtl),
+            cache = cf.create(playerId, "mounts/skins", cacheEntryTtl),
             allIds = ::gw2v2MountsSkinsIds,
             byIds = ::gw2v2MountsSkinsByIds,
             byPage = ::gw2v2MountsSkinsByPage,
             getId = GW2v2MountSkin::id,
         )
         override val mountsTypes: EndpointEntity<GW2MountTypeId, GW2v2MountType> = ef.entity(
-            cache = cf.create(player, "mounts/types", cacheEntryTtl),
+            cache = cf.create(playerId, "mounts/types", cacheEntryTtl),
             allIds = ::gw2v2MountsTypesIds,
             byIds = ::gw2v2MountsTypesByIds,
             byPage = ::gw2v2MountsTypesByPage,
             getId = GW2v2MountType::id,
         )
         override val outfits: EndpointEntity<GW2OutfitId, GW2v2Outfit> = ef.entity(
-            cache = cf.create(player, "outfits", cacheEntryTtl),
+            cache = cf.create(playerId, "outfits", cacheEntryTtl),
             allIds = ::gw2v2OutfitsIds,
             byIds = ::gw2v2OutfitsByIds,
             byPage = ::gw2v2OutfitsByPage,
             getId = GW2v2Outfit::id,
         )
         override val pets: EndpointEntity<GW2PetId, GW2v2Pet> = ef.entity(
-            cache = cf.create(player, "pets", cacheEntryTtl),
+            cache = cf.create(playerId, "pets", cacheEntryTtl),
             allIds = ::gw2v2PetsIds,
             byIds = ::gw2v2PetsByIds,
             byPage = ::gw2v2PetsByPage,
             getId = GW2v2Pet::id,
         )
         override val professions: EndpointEntity<GW2ProfessionId, GW2v2Profession> = ef.entity(
-            cache = cf.create(player, "professions", cacheEntryTtl),
+            cache = cf.create(playerId, "professions", cacheEntryTtl),
             allIds = ::gw2v2ProfessionsIds,
             byIds = ::gw2v2ProfessionsByIds,
             byPage = ::gw2v2ProfessionsByPage,
             getId = GW2v2Profession::id,
         )
         override val races: EndpointEntity<GW2RaceId, GW2v2Race> = ef.entity(
-            cache = cf.create(player, "races", cacheEntryTtl),
+            cache = cf.create(playerId, "races", cacheEntryTtl),
             allIds = ::gw2v2RacesIds,
             byIds = ::gw2v2RacesByIds,
             byPage = ::gw2v2RacesByPage,
             getId = GW2v2Race::id,
         )
         override val skiffs: EndpointEntity<GW2SkiffId, GW2v2Skiff> = ef.entity(
-            cache = cf.create(player, "skiffs", cacheEntryTtl),
+            cache = cf.create(playerId, "skiffs", cacheEntryTtl),
             allIds = ::gw2v2SkiffsIds,
             byIds = ::gw2v2SkiffsByIds,
             byPage = ::gw2v2SkiffsByPage,
             getId = GW2v2Skiff::id,
         )
         override val skills: EndpointEntity<GW2SkillId, GW2v2Skill> = ef.entity(
-            cache = cf.create(player, "skills", cacheEntryTtl),
+            cache = cf.create(playerId, "skills", cacheEntryTtl),
             allIds = ::gw2v2SkillsIds,
             byIds = ::gw2v2SkillsByIds,
             byPage = ::gw2v2SkillsByPage,
             getId = GW2v2Skill::id,
         )
         override val specializations: EndpointEntity<GW2SpecializationId, GW2v2Specialization> = ef.entity(
-            cache = cf.create(player, "specializations", cacheEntryTtl),
+            cache = cf.create(playerId, "specializations", cacheEntryTtl),
             allIds = ::gw2v2SpecializationsIds,
             byIds = ::gw2v2SpecializationsByIds,
             byPage = ::gw2v2SpecializationsByPage,
             getId = GW2v2Specialization::id,
         )
         override val traits: EndpointEntity<GW2TraitId, GW2v2Trait> = ef.entity(
-            cache = cf.create(player, "traits", cacheEntryTtl),
+            cache = cf.create(playerId, "traits", cacheEntryTtl),
             allIds = ::gw2v2TraitsIds,
             byIds = ::gw2v2TraitsByIds,
             byPage = ::gw2v2TraitsByPage,
             getId = GW2v2Trait::id,
         )
         override val homeCats: EndpointEntity<GW2HomeInstanceCatId, GW2v2HomeInstanceCat> = ef.entity(
-            cache = cf.create(player, "home/cats", cacheEntryTtl),
+            cache = cf.create(playerId, "home/cats", cacheEntryTtl),
             allIds = ::gw2v2HomeCatsIds,
             byIds = ::gw2v2HomeCatsByIds,
             byPage = ::gw2v2HomeCatsByPage,
             getId = GW2v2HomeInstanceCat::id,
         )
         override val homeNodes: EndpointEntity<GW2HomeInstanceNodeId, GW2v2HomeInstanceNode> = ef.entity(
-            cache = cf.create(player, "home/nodes", cacheEntryTtl),
+            cache = cf.create(playerId, "home/nodes", cacheEntryTtl),
             allIds = ::gw2v2HomeNodesIds,
             byIds = ::gw2v2HomeNodesByIds,
             byPage = ::gw2v2HomeNodesByPage,
             getId = GW2v2HomeInstanceNode::id,
         )
         override val finishers: EndpointEntity<GW2FinisherId, GW2v2Finisher> = ef.entity(
-            cache = cf.create(player, "finishers", cacheEntryTtl),
+            cache = cf.create(playerId, "finishers", cacheEntryTtl),
             allIds = ::gw2v2FinishersIds,
             byIds = ::gw2v2FinishersByIds,
             byPage = ::gw2v2FinishersByPage,
             getId = GW2v2Finisher::id,
         )
         override val items: EndpointEntity<GW2ItemId, GW2v2Item> = ef.entity(
-            cache = cf.create(player, "items", cacheEntryTtl),
+            cache = cf.create(playerId, "items", cacheEntryTtl),
             allIds = ::gw2v2ItemsIds,
             byIds = ::gw2v2ItemsByIds,
             byPage = ::gw2v2ItemsByPage,
             getId = GW2v2Item::id,
         )
         override val materials: EndpointEntity<GW2MaterialId, GW2v2MaterialCategory> = ef.entity(
-            cache = cf.create(player, "materials", cacheEntryTtl),
+            cache = cf.create(playerId, "materials", cacheEntryTtl),
             allIds = ::gw2v2MaterialsIds,
             byIds = ::gw2v2MaterialsByIds,
             byPage = ::gw2v2MaterialsByPage,
             getId = GW2v2MaterialCategory::id,
         )
         override val recipes: EndpointEntity<GW2RecipeId, GW2v2Recipe> = ef.entity(
-            cache = cf.create(player, "recipes", cacheEntryTtl),
+            cache = cf.create(playerId, "recipes", cacheEntryTtl),
             allIds = ::gw2v2RecipesIds,
             byIds = ::gw2v2RecipesByIds,
             byPage = ::gw2v2RecipesByPage,
             getId = GW2v2Recipe::id,
         )
         override val skins: EndpointEntity<GW2SkinId, GW2v2Skin> = ef.entity(
-            cache = cf.create(player, "skins", cacheEntryTtl),
+            cache = cf.create(playerId, "skins", cacheEntryTtl),
             allIds = ::gw2v2SkinsIds,
             byIds = ::gw2v2SkinsByIds,
             byPage = ::gw2v2SkinsByPage,
             getId = GW2v2Skin::id,
         )
         override val colors: EndpointEntity<GW2ColorId, GW2v2Color> = ef.entity(
-            cache = cf.create(player, "colors", cacheEntryTtl),
+            cache = cf.create(playerId, "colors", cacheEntryTtl),
             allIds = ::gw2v2ColorsIds,
             byIds = ::gw2v2ColorsByIds,
             byPage = ::gw2v2ColorsByPage,
             getId = GW2v2Color::id,
         )
         override val dailyCrafting: EndpointEntity<String, GW2v2DailyCrafting> = ef.entity(
-            cache = cf.create(player, "dailyCrafting", cacheEntryTtl),
+            cache = cf.create(playerId, "dailyCrafting", cacheEntryTtl),
             allIds = ::gw2v2DailyCraftingIds,
             byIds = ::gw2v2DailyCraftingByIds,
             byPage = ::gw2v2DailyCraftingByPage,
             getId = GW2v2DailyCrafting::id,
         )
         override val dungeons: EndpointEntity<GW2DungeonId, GW2v2Dungeon> = ef.entity(
-            cache = cf.create(player, "dungeons", cacheEntryTtl),
+            cache = cf.create(playerId, "dungeons", cacheEntryTtl),
             allIds = ::gw2v2DungeonsIds,
             byIds = ::gw2v2DungeonsByIds,
             byPage = ::gw2v2DungeonsByPage,
             getId = GW2v2Dungeon::id,
         )
         override val novelties: EndpointEntity<GW2NoveltyId, GW2v2Novelty> = ef.entity(
-            cache = cf.create(player, "novelties", cacheEntryTtl),
+            cache = cf.create(playerId, "novelties", cacheEntryTtl),
             allIds = ::gw2v2NoveltiesIds,
             byIds = ::gw2v2NoveltiesByIds,
             byPage = ::gw2v2NoveltiesByPage,
             getId = GW2v2Novelty::id,
         )
         override val quaggans: EndpointEntity<GW2QuagganId, GW2v2Quaggan> = ef.entity(
-            cache = cf.create(player, "quaggans", cacheEntryTtl),
+            cache = cf.create(playerId, "quaggans", cacheEntryTtl),
             allIds = ::gw2v2QuaggansIds,
             byIds = ::gw2v2QuaggansByIds,
             byPage = ::gw2v2QuaggansByPage,
             getId = GW2v2Quaggan::id,
         )
         override val raids: EndpointEntity<GW2RaidId, GW2v2Raid> = ef.entity(
-            cache = cf.create(player, "raids", cacheEntryTtl),
+            cache = cf.create(playerId, "raids", cacheEntryTtl),
             allIds = ::gw2v2RaidsIds,
             byIds = ::gw2v2RaidsByIds,
             byPage = ::gw2v2RaidsByPage,
             getId = GW2v2Raid::id,
         )
         override val titles: EndpointEntity<GW2TitleId, GW2v2Title> = ef.entity(
-            cache = cf.create(player, "titles", cacheEntryTtl),
+            cache = cf.create(playerId, "titles", cacheEntryTtl),
             allIds = ::gw2v2TitlesIds,
             byIds = ::gw2v2TitlesByIds,
             byPage = ::gw2v2TitlesByPage,
             getId = GW2v2Title::id,
         )
         override val worlds: EndpointEntity<GW2WorldId, GW2v2World> = ef.entity(
-            cache = cf.create(player, "worlds", cacheEntryTtl),
+            cache = cf.create(playerId, "worlds", cacheEntryTtl),
             allIds = ::gw2v2WorldsIds,
             byIds = ::gw2v2WorldsByIds,
             byPage = ::gw2v2WorldsByPage,
             getId = GW2v2World::id,
         )
         override val backstoryAnswers: EndpointEntity<GW2BackstoryAnswerId, GW2v2BackstoryAnswer> = ef.entity(
-            cache = cf.create(player, "backstory/answers", cacheEntryTtl),
+            cache = cf.create(playerId, "backstory/answers", cacheEntryTtl),
             allIds = ::gw2v2BackstoryAnswersIds,
             byIds = ::gw2v2BackstoryAnswersByIds,
             byPage = ::gw2v2BackstoryAnswersByPage,
             getId = GW2v2BackstoryAnswer::id,
         )
         override val backstoryQuestions: EndpointEntity<GW2BackstoryQuestionId, GW2v2BackstoryQuestion> = ef.entity(
-            cache = cf.create(player, "backstory/questions", cacheEntryTtl),
+            cache = cf.create(playerId, "backstory/questions", cacheEntryTtl),
             allIds = ::gw2v2BackstoryQuestionsIds,
             byIds = ::gw2v2BackstoryQuestionsByIds,
             byPage = ::gw2v2BackstoryQuestionsByPage,
             getId = GW2v2BackstoryQuestion::id,
         )
         override val quests: EndpointEntity<Long, GW2v2Quest> = ef.entity(
-            cache = cf.create(player, "quests", cacheEntryTtl),
+            cache = cf.create(playerId, "quests", cacheEntryTtl),
             allIds = ::gw2v2QuestsIds,
             byIds = ::gw2v2QuestsByIds,
             byPage = ::gw2v2QuestsByPage,
             getId = GW2v2Quest::id,
         )
         override val stories: EndpointEntity<GW2StoryId, GW2v2Story> = ef.entity(
-            cache = cf.create(player, "stories", cacheEntryTtl),
+            cache = cf.create(playerId, "stories", cacheEntryTtl),
             allIds = ::gw2v2StoriesIds,
             byIds = ::gw2v2StoriesByIds,
             byPage = ::gw2v2StoriesByPage,
             getId = GW2v2Story::id,
         )
         override val storiesSeasons: EndpointEntity<GW2StorySeasonId, GW2v2StorySeason> = ef.entity(
-            cache = cf.create(player, "storiesSeasons", cacheEntryTtl),
+            cache = cf.create(playerId, "storiesSeasons", cacheEntryTtl),
             allIds = ::gw2v2StoriesSeasonsIds,
             byIds = ::gw2v2StoriesSeasonsByIds,
             byPage = ::gw2v2StoriesSeasonsByPage,
             getId = GW2v2StorySeason::id,
         )
         override val currencies: EndpointEntity<GW2CurrencyId, GW2v2Currency> = ef.entity(
-            cache = cf.create(player, "currencies", cacheEntryTtl),
+            cache = cf.create(playerId, "currencies", cacheEntryTtl),
             allIds = ::gw2v2CurrenciesIds,
             byIds = ::gw2v2CurrenciesByIds,
             byPage = ::gw2v2CurrenciesByPage,
@@ -626,7 +632,7 @@ class ApiImplementation(
         )
         override val wizardsVaultListings: EndpointEntity<GW2WizardsVaultListingId, GW2v2WizardsVaultListing> =
             ef.entity(
-                cache = cf.create(player, "wv/listings", cacheEntryTtl),
+                cache = cf.create(playerId, "wv/listings", cacheEntryTtl),
                 allIds = ::gw2v2WizardsVaultListingsIds,
                 byIds = ::gw2v2WizardsVaultListingsByIds,
                 byPage = ::gw2v2WizardsVaultListingsByPage,
@@ -634,28 +640,28 @@ class ApiImplementation(
             )
         override val wizardsVaultObjectives: EndpointEntity<GW2WizardsVaultObjectiveId, GW2v2WizardsVaultObjective> =
             ef.entity(
-                cache = cf.create(player, "wv/objectives", cacheEntryTtl),
+                cache = cf.create(playerId, "wv/objectives", cacheEntryTtl),
                 allIds = ::gw2v2WizardsVaultObjectivesIds,
                 byIds = ::gw2v2WizardsVaultObjectivesByIds,
                 byPage = ::gw2v2WizardsVaultObjectivesByPage,
                 getId = GW2v2WizardsVaultObjective::id,
             )
         override val emotes: EndpointEntity<GW2EmoteId, GW2v2Emote> = ef.entity(
-            cache = cf.create(player, "emotes", cacheEntryTtl),
+            cache = cf.create(playerId, "emotes", cacheEntryTtl),
             allIds = ::gw2v2EmotesIds,
             byIds = ::gw2v2EmotesByIds,
             byPage = ::gw2v2EmotesByPage,
             getId = GW2v2Emote::id,
         )
         override val gliders: EndpointEntity<GW2GliderId, GW2v2Glider> = ef.entity(
-            cache = cf.create(player, "gliders", cacheEntryTtl),
+            cache = cf.create(playerId, "gliders", cacheEntryTtl),
             allIds = ::gw2v2GlidersIds,
             byIds = ::gw2v2GlidersByIds,
             byPage = ::gw2v2GlidersByPage,
             getId = GW2v2Glider::id,
         )
         override val mailCarriers: EndpointEntity<GW2MailCarrierId, GW2v2Mailcarrier> = ef.entity(
-            cache = cf.create(player, "mailCarriers", cacheEntryTtl),
+            cache = cf.create(playerId, "mailCarriers", cacheEntryTtl),
             allIds = ::gw2v2MailcarriersIds,
             byIds = ::gw2v2MailcarriersByIds,
             byPage = ::gw2v2MailcarriersByPage,
@@ -672,14 +678,14 @@ class ApiImplementation(
 
     private inner class ApiTradingPostImpl : ApiTradingPost {
         override val listings: EndpointEntity<GW2ItemId, GW2v2CommerceListing> = ef.entity(
-            cache = cf.create(player, "tp/listings", cacheEntryTtl),
+            cache = cf.create(playerId, "tp/listings", cacheEntryTtl),
             allIds = ::gw2v2CommerceListingsIds,
             byIds = ::gw2v2CommerceListingsByIds,
             byPage = ::gw2v2CommerceListingsByPage,
             getId = GW2v2CommerceListing::id,
         )
         override val prices: EndpointEntity<GW2ItemId, GW2v2CommercePrices> = ef.entity(
-            cache = cf.create(player, "tp/prices", cacheEntryTtl),
+            cache = cf.create(playerId, "tp/prices", cacheEntryTtl),
             allIds = ::gw2v2CommercePricesIds,
             byIds = ::gw2v2CommercePricesByIds,
             byPage = ::gw2v2CommercePricesByPage,
@@ -688,7 +694,7 @@ class ApiImplementation(
     }
 
     private inner class ApiTradingPostAuthenticatedImpl : ApiTradingPostAuthenticated {
-        override val delivery: EndpointSimple<GW2v2CommerceDelivery> = ef.simple(::gw2v2CommerceDelivery)
+        override val delivery: EndpointSimple<GW2v2CommerceDelivery> = ef.simple(cacheSimple, ::gw2v2CommerceDelivery)
         override val transactionsCurrentBuys: EndpointSimplePaged<GW2v2CommerceTransaction> = ef.simplePaged(
             byPage = { page, pageSize, configure ->
                 gw2v2CommerceTransactionsByPage(
@@ -736,51 +742,64 @@ class ApiImplementation(
     }
 
     private inner class ApiAuthenticatedImpl : ApiAuthenticated {
-        override val account: EndpointSimple<GW2v2Account> = ef.simple(::gw2v2Account)
-        override val achievements: EndpointSimple<List<GW2v2AccountAchievement>> = ef.simple(::gw2v2AccountAchievements)
-        override val bank: EndpointSimple<List<GW2v2AccountBankSlot?>> = ef.simple(::gw2v2AccountBank)
-        override val dailyCrafting: EndpointSimple<List<String>> = ef.simple(::gw2v2AccountDailyCrafting)
-        override val dungeons: EndpointSimple<List<String>> = ef.simple(::gw2v2AccountDungeons)
-        override val dyes: EndpointSimple<List<GW2DyeId>> = ef.simple(::gw2v2AccountDyes)
-        override val emotes: EndpointSimple<List<GW2EmoteId>> = ef.simple(::gw2v2AccountEmotes)
-        override val finishers: EndpointSimple<List<GW2v2AccountFinisher>> = ef.simple(::gw2v2AccountFinishers)
-        override val gliders: EndpointSimple<List<GW2GliderId>> = ef.simple(::gw2v2AccountGliders)
-        override val homeCats: EndpointSimple<List<GW2HomeInstanceCatId>> = ef.simple(::gw2v2AccountHomeCats)
-        override val homeNodes: EndpointSimple<List<GW2HomeInstanceNodeId>> = ef.simple(::gw2v2AccountHomeNodes)
-        override val inventory: EndpointSimple<List<GW2v2AccountInventorySlot>> = ef.simple(::gw2v2AccountInventory)
-        override val jadebots: EndpointSimple<List<GW2JadeBotId>> = ef.simple(::gw2v2AccountJadeBots)
+        override val account: EndpointSimple<GW2v2Account> = ef.simple(cacheSimple, ::gw2v2Account)
+        override val achievements: EndpointSimple<List<GW2v2AccountAchievement>> =
+            ef.simple(cacheSimple, ::gw2v2AccountAchievements)
+        override val bank: EndpointSimple<List<GW2v2AccountBankSlot?>> = ef.simple(cacheSimple, ::gw2v2AccountBank)
+        override val dailyCrafting: EndpointSimple<List<String>> = ef.simple(cacheSimple, ::gw2v2AccountDailyCrafting)
+        override val dungeons: EndpointSimple<List<String>> = ef.simple(cacheSimple, ::gw2v2AccountDungeons)
+        override val dyes: EndpointSimple<List<GW2DyeId>> = ef.simple(cacheSimple, ::gw2v2AccountDyes)
+        override val emotes: EndpointSimple<List<GW2EmoteId>> = ef.simple(cacheSimple, ::gw2v2AccountEmotes)
+        override val finishers: EndpointSimple<List<GW2v2AccountFinisher>> =
+            ef.simple(cacheSimple, ::gw2v2AccountFinishers)
+        override val gliders: EndpointSimple<List<GW2GliderId>> = ef.simple(cacheSimple, ::gw2v2AccountGliders)
+        override val homeCats: EndpointSimple<List<GW2HomeInstanceCatId>> =
+            ef.simple(cacheSimple, ::gw2v2AccountHomeCats)
+        override val homeNodes: EndpointSimple<List<GW2HomeInstanceNodeId>> =
+            ef.simple(cacheSimple, ::gw2v2AccountHomeNodes)
+        override val inventory: EndpointSimple<List<GW2v2AccountInventorySlot?>> =
+            ef.simple(cacheSimple, ::gw2v2AccountInventory)
+        override val jadebots: EndpointSimple<List<GW2JadeBotId>> = ef.simple(cacheSimple, ::gw2v2AccountJadeBots)
         override val legendaryArmory: EndpointSimple<List<GW2v2AccountLegendaryArmoryUnlock>> =
-            ef.simple(::gw2v2AccountLegendaryArmory)
-        override val luck: EndpointSimple<List<GW2v2Luck>> = ef.simple(::gw2v2AccountLuck)
-        override val mailCarriers: EndpointSimple<List<GW2MailCarrierId>> = ef.simple(::gw2v2AccountMailcarriers)
-        override val mapChests: EndpointSimple<List<String>> = ef.simple(::gw2v2AccountMapChests)
-        override val masteries: EndpointSimple<List<GW2v2AccountMastery>> = ef.simple(::gw2v2AccountMasteries)
-        override val masteryPoints: EndpointSimple<GW2v2AccountMasteryPoint> = ef.simple(::gw2v2AccountMasteryPoints)
-        override val materials: EndpointSimple<List<GW2v2AccountMaterial>> = ef.simple(::gw2v2AccountMaterials)
-        override val minis: EndpointSimple<List<GW2MiniId>> = ef.simple(::gw2v2AccountMinis)
-        override val mountsSkins: EndpointSimple<List<GW2MountSkinId>> = ef.simple(::gw2v2AccountMountsSkins)
-        override val mountsTypes: EndpointSimple<List<GW2MountTypeId>> = ef.simple(::gw2v2AccountMountsTypes)
-        override val novelties: EndpointSimple<List<GW2NoveltyId>> = ef.simple(::gw2v2AccountNovelties)
-        override val outfits: EndpointSimple<List<GW2OutfitId>> = ef.simple(::gw2v2AccountOutfits)
-        override val pvpHeroes: EndpointSimple<List<GW2PvpHeroId>> = ef.simple(::gw2v2AccountPvPHeroes)
-        override val raids: EndpointSimple<List<GW2RaidId>> = ef.simple(::gw2v2AccountRaids)
-        override val recipes: EndpointSimple<List<GW2RecipeId>> = ef.simple(::gw2v2AccountRecipes)
-        override val skiffs: EndpointSimple<List<GW2SkiffId>> = ef.simple(::gw2v2AccountSkiffs)
-        override val skins: EndpointSimple<List<GW2SkinId>> = ef.simple(::gw2v2AccountSkins)
-        override val titles: EndpointSimple<List<GW2TitleId>> = ef.simple(::gw2v2AccountTitles)
-        override val wallet: EndpointSimple<List<GW2v2AccountWalletCurrency>> = ef.simple(::gw2v2AccountWallet)
+            ef.simple(cacheSimple, ::gw2v2AccountLegendaryArmory)
+        override val luck: EndpointSimple<List<GW2v2Luck>> = ef.simple(cacheSimple, ::gw2v2AccountLuck)
+        override val mailCarriers: EndpointSimple<List<GW2MailCarrierId>> =
+            ef.simple(cacheSimple, ::gw2v2AccountMailcarriers)
+        override val mapChests: EndpointSimple<List<String>> = ef.simple(cacheSimple, ::gw2v2AccountMapChests)
+        override val masteries: EndpointSimple<List<GW2v2AccountMastery>> =
+            ef.simple(cacheSimple, ::gw2v2AccountMasteries)
+        override val masteryPoints: EndpointSimple<GW2v2AccountMasteryPoint> =
+            ef.simple(cacheSimple, ::gw2v2AccountMasteryPoints)
+        override val materials: EndpointSimple<List<GW2v2AccountMaterial>> =
+            ef.simple(cacheSimple, ::gw2v2AccountMaterials)
+        override val minis: EndpointSimple<List<GW2MiniId>> = ef.simple(cacheSimple, ::gw2v2AccountMinis)
+        override val mountsSkins: EndpointSimple<List<GW2MountSkinId>> =
+            ef.simple(cacheSimple, ::gw2v2AccountMountsSkins)
+        override val mountsTypes: EndpointSimple<List<GW2MountTypeId>> =
+            ef.simple(cacheSimple, ::gw2v2AccountMountsTypes)
+        override val novelties: EndpointSimple<List<GW2NoveltyId>> = ef.simple(cacheSimple, ::gw2v2AccountNovelties)
+        override val outfits: EndpointSimple<List<GW2OutfitId>> = ef.simple(cacheSimple, ::gw2v2AccountOutfits)
+        override val pvpHeroes: EndpointSimple<List<GW2PvpHeroId>> = ef.simple(cacheSimple, ::gw2v2AccountPvPHeroes)
+        override val raids: EndpointSimple<List<GW2RaidId>> = ef.simple(cacheSimple, ::gw2v2AccountRaids)
+        override val recipes: EndpointSimple<List<GW2RecipeId>> = ef.simple(cacheSimple, ::gw2v2AccountRecipes)
+        override val skiffs: EndpointSimple<List<GW2SkiffId>> = ef.simple(cacheSimple, ::gw2v2AccountSkiffs)
+        override val skins: EndpointSimple<List<GW2SkinId>> = ef.simple(cacheSimple, ::gw2v2AccountSkins)
+        override val titles: EndpointSimple<List<GW2TitleId>> = ef.simple(cacheSimple, ::gw2v2AccountTitles)
+        override val wallet: EndpointSimple<List<GW2v2AccountWalletCurrency>> =
+            ef.simple(cacheSimple, ::gw2v2AccountWallet)
         override val wizardsVaultDaily: EndpointSimple<GW2v2AccountWizardsVaultDaily> =
-            ef.simple(::gw2v2AccountWizardsVaultDaily)
+            ef.simple(cacheSimple, ::gw2v2AccountWizardsVaultDaily)
         override val wizardsVaultListings: EndpointSimple<List<GW2v2AccountWizardsVaultListing>> =
-            ef.simple(::gw2v2AccountWizardsVaultListings)
+            ef.simple(cacheSimple, ::gw2v2AccountWizardsVaultListings)
         override val wizardsVaultSpecial: EndpointSimple<GW2v2AccountWizardsVaultSpecial> =
-            ef.simple(::gw2v2AccountWizardsVaultSpecial)
+            ef.simple(cacheSimple, ::gw2v2AccountWizardsVaultSpecial)
         override val wizardsVaultWeekly: EndpointSimple<GW2v2AccountWizardsVaultWeekly> =
-            ef.simple(::gw2v2AccountWizardsVaultWeekly)
-        override val worldBosses: EndpointSimple<List<GW2WorldBossId>> = ef.simple(::gw2v2AccountWorldBosses)
-        override val tokenInfo: EndpointSimple<GW2v2TokenInfo> = ef.simple(::gw2v2TokenInfo)
+            ef.simple(cacheSimple, ::gw2v2AccountWizardsVaultWeekly)
+        override val worldBosses: EndpointSimple<List<GW2WorldBossId>> =
+            ef.simple(cacheSimple, ::gw2v2AccountWorldBosses)
+        override val tokenInfo: EndpointSimple<GW2v2TokenInfo> = ef.simple(cacheSimple, ::gw2v2TokenInfo)
         override val characters: EndpointEntity<String, GW2v2Character> = ef.entity(
-            cache = cf.create(player, "characters", cacheEntryTtl),
+            cache = cf.create(playerId, "characters", cacheEntryTtl),
             allIds = ::gw2v2CharactersIds,
             byIds = ::gw2v2CharactersByIds,
             byPage = ::gw2v2CharactersByPage,

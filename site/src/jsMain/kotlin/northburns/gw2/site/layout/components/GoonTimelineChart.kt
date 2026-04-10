@@ -1,6 +1,5 @@
 package northburns.gw2.site.layout.components
 
-import io.github.aakira.napier.Napier
 import io.kvision.chart.Chart
 import io.kvision.chart.ChartOptions
 import io.kvision.chart.ChartScales
@@ -10,6 +9,7 @@ import io.kvision.chart.DataSets
 import io.kvision.chart.ScalesType
 import io.kvision.chart.TickOptions
 import io.kvision.chart.js.ChartDatasetProperties
+import northburns.gw2.client.myclient.log.GoonLog
 import northburns.gw2.site.helper.datefns.fi
 import northburns.gw2.site.util.jso
 import kotlin.time.Instant
@@ -63,7 +63,7 @@ class GoonTimelineChart<DATASET_K : Any, DATASET_V : Any>(
     )
 
     fun addValue(v: DATASET_V) {
-        Napier.i("ADDING SNAPSHOT!")
+        GoonLog["GoonTimelineChart"].info("ADDING SNAPSHOT!")
 
         val (t, values) = dataExtract(v)
 

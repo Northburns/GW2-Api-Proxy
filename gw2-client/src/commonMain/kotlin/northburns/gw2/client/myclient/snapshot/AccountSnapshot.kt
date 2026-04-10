@@ -1,18 +1,23 @@
 package northburns.gw2.client.myclient.snapshot
 
+import arrow.optics.optics
+import com.gw2tb.gw2api.types.GW2AchievementId
 import com.gw2tb.gw2api.types.GW2CurrencyId
 import com.gw2tb.gw2api.types.GW2ItemId
+import com.gw2tb.gw2api.types.v2.GW2v2Account
+import com.gw2tb.gw2api.types.v2.GW2v2AccountAchievement
 import com.gw2tb.gw2api.types.v2.GW2v2AccountBankSlot
 import com.gw2tb.gw2api.types.v2.GW2v2AccountInventorySlot
 import com.gw2tb.gw2api.types.v2.GW2v2AccountLegendaryArmoryUnlock
 import com.gw2tb.gw2api.types.v2.GW2v2AccountMaterial
+import com.gw2tb.gw2api.types.v2.GW2v2AccountWalletCurrency
+import com.gw2tb.gw2api.types.v2.GW2v2Character
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import northburns.gw2.client.myclient.gw2e.Gw2eAccountSnapshot
-import northburns.gw2.client.myclient.gw2e.Gw2eAccountSnapshot.Character
-import kotlin.jvm.JvmInline
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
+import kotlin.js.JsExport
+import kotlin.js.JsName
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -22,28 +27,113 @@ import kotlin.uuid.Uuid
  * I am only interested in items (incl. materials, legendaries) and currencies - for now at least
  */
 @Serializable
+@JsExport
+@optics
 data class AccountSnapshot(
     val id: AccountSnapshotId,
     val creationDate: Instant,
-    val account: Account,
+    val autoUpdate: Boolean = false,
+    val account: SnapshotSource<GW2v2Account> = SnapshotSource.empty(),
+    val achievements: SnapshotSource<Map<GW2AchievementId, GW2v2AccountAchievement>> = SnapshotSource.empty(),
+    val wallet: SnapshotSource<Map<GW2CurrencyId, GW2v2AccountWalletCurrency>> = SnapshotSource.empty(),
+    val shared: SnapshotSource<List<GW2v2AccountInventorySlot?>> = SnapshotSource.empty(),
+    val bank: SnapshotSource<List<GW2v2AccountBankSlot?>> = SnapshotSource.empty(),
+    val materials: SnapshotSource<Map<GW2ItemId, GW2v2AccountMaterial>> = SnapshotSource.empty(),
+    val legendaryarmory: SnapshotSource<Map<GW2ItemId, GW2v2AccountLegendaryArmoryUnlock>> = SnapshotSource.empty(),
+    val characterNames: SnapshotSource<List<String>> = SnapshotSource.empty(),
+    val characters: Map<String, SnapshotSource<GW2v2Character>> = emptyMap(),
 ) {
+
+    fun missingCharacterNames(): Set<String> = characterNames.value?.minus(characters.keys)?.toSet() ?: emptySet()
+
+    companion object {
+        @JsName("getAccountAchievement")
+        operator fun AccountSnapshot?.get(id: GW2AchievementId) = this?.achievements?.value?.get(id)
+
+        @JsName("getAccountWalletCurrency")
+        operator fun AccountSnapshot?.get(id: GW2CurrencyId) = this?.wallet?.value?.get(id)
+
+        // operator fun AccountSnapshot?.get(id: GW2ItemId) = too many to search from
+        @JsName("getAccountCharacter")
+        operator fun AccountSnapshot?.get(id: String) = this?.characters?.get(id)?.value
+
+        fun new() = AccountSnapshot(
+            id = AccountSnapshot.AccountSnapshotIdGoon.random(),
+            creationDate = Clock.System.now(),
+        )
+
+    }
+
+    val totals: Totals by lazy {
+        Totals(
+            wallet = wallet.value?.mapValues { (_, v) -> v.value } ?: emptyMap(),
+            stock = createStock(
+                shared = shared.value ?: emptyList(),
+                bank = bank.value ?: emptyList(),
+                materials = materials.value ?: emptyMap(),
+                legendaryarmory = legendaryarmory.value ?: emptyMap(),
+                characters = characters.values.mapNotNull { it.value },
+            )
+        )
+    }
+
+    @Serializable
+    data class AccountSnapshotMeta(
+        val id: AccountSnapshotId,
+        val creationDate: Instant,
+        val displayName: String,
+    )
+
+    @Serializable
+    data class SnapshotSource<T : Any>(
+        val value: T?,
+        val creationDate: Instant,
+        val state: Status,
+    ) {
+
+        companion object {
+            fun <T : Any> empty() = SnapshotSource<T>(
+                value = null, creationDate = Instant.DISTANT_PAST, state = Stale
+            )
+
+            operator fun <K : Any, T : Any> SnapshotSource<Map<K, T>>?.get(key: K): T? =
+                this?.value?.get(key)
+
+        }
+    }
+
+    @Serializable
+    sealed interface Status
+
+    @Serializable
+    object Fresh : Status
+
+    @Serializable
+    object Stale : Status
+    @Serializable data class Error (val message :String): Status
+
+    @Serializable
+    data class UpdateRequested(val at: Instant) : Status
+
     @Serializable
     sealed interface AccountSnapshotId {}
 
-    @JvmInline
     @Serializable
     @SerialName("gw2e")
-    value class AccountSnapshotIdGw2e(val value: String) : AccountSnapshotId
+    data class AccountSnapshotIdGw2e(val value: String) : AccountSnapshotId
 
-    @JvmInline
     @Serializable
     @SerialName("goon")
-    value class AccountSnapshotIdGoon
-    @OptIn(ExperimentalUuidApi::class) constructor(val value: Uuid) : AccountSnapshotId
+    data class AccountSnapshotIdGoon
+    @OptIn(ExperimentalUuidApi::class) constructor(val value: Uuid) : AccountSnapshotId {
+        companion object {
+            @OptIn(ExperimentalUuidApi::class)
+            fun random() = AccountSnapshotIdGoon(Uuid.random())
+        }
+    }
 
     @Serializable
-    data class Account(
-        val age: Duration,
+    data class Totals(
         val wallet: Map<GW2CurrencyId, Long>,
         val stock: Map<GW2ItemId, Stock>,
     ) {
@@ -63,81 +153,4 @@ data class AccountSnapshot(
         )
     }
 
-    companion object {
-
-        fun fromGw2e(id: AccountSnapshotIdGw2e, gw2e: Gw2eAccountSnapshot?): AccountSnapshot? {
-            return if (gw2e == null) null else
-                AccountSnapshot(
-                    id = id,
-                    creationDate = gw2e.creationDate,
-                    account = Account(
-                        age = gw2e.account.account.age.seconds,
-                        wallet = gw2e.account.wallet.associate { it.id to it.value },
-                        stock = stockFromGw2e(gw2e),
-                    ),
-                )
-        }
-
-        private fun stockFromGw2e(gw2e: Gw2eAccountSnapshot): Map<GW2ItemId, Stock> {
-            return createStock(
-                shared = gw2e.account.shared,
-                bank = gw2e.account.bank,
-                materials = gw2e.account.materials,
-                legendaryarmory = gw2e.account.legendaryarmory,
-                characters = gw2e.account.characters,
-            )
-        }
-
-        fun createStock(
-            shared: List<GW2v2AccountInventorySlot?>,
-            bank: List<GW2v2AccountBankSlot?>,
-            materials: List<GW2v2AccountMaterial>,
-            legendaryarmory: List<GW2v2AccountLegendaryArmoryUnlock>,
-            characters: List<Character>,
-        ): Map<GW2ItemId, Stock> {
-            val m = mutableMapOf<GW2ItemId, Stock>()
-            fun stock(id: GW2ItemId, mutate: Stock.() -> Stock) = m
-                .getOrPut(id) { Stock(id, 0, sources = emptySet()) }
-                .also { stock -> m[id] = mutate(stock) }
-
-            // Shared
-            shared.asSequence().filterNotNull().forEach { slot ->
-                stock(slot.id) { copyPlusCount(slot.count, "Shared Inventory") }
-            }
-
-            // Bank
-            bank.asSequence().filterNotNull().forEach { slot ->
-                stock(slot.id) { copyPlusCount(slot.count, "Bank") }
-            }
-
-            // Material Storage
-            materials.asSequence().forEach { slot ->
-                stock(slot.id) { copyPlusCount(slot.count, "Material Storage") }
-            }
-
-            // Legendary Armory
-            legendaryarmory.forEach { slot ->
-                stock(slot.id) { copyPlusCount(slot.count, "Legendary Armory") }
-            }
-
-            // Characters
-            characters.asSequence().forEach { slot ->
-                val name = slot.name
-                slot.equipment?.forEach { equipmentSlot ->
-                    stock(equipmentSlot.id) { copyPlusCount(1, "Character (equipment): $name") }
-                }
-                // TODO equipment_tabs
-
-                slot.bags?.forEach { bagSlot ->
-                    bagSlot?.inventory?.filterNotNull()?.forEach { slot ->
-                        stock(slot.id) { copyPlusCount(slot.count, "Character (bags): $name") }
-                    }
-                }
-            }
-
-            return m
-        }
-
-
-    }
 }

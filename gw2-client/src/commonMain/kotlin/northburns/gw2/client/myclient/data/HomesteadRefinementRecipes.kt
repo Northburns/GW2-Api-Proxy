@@ -85,7 +85,7 @@ object HomesteadRefinementRecipes {
     val forge = listOf(
         HomesteadRefinementRecipe(item = Gw2Ids.`Orichalcum Ore`, count = 1, materials = 2),
         HomesteadRefinementRecipe(item = Gw2Ids.`Mithril Ore`, count = 1, materials = 1),
-        HomesteadRefinementRecipe(item = Gw2Ids.`Platinum Ore`, count = 1, materials = 1),
+        HomesteadRefinementRecipe(item = Gw2Ids.`Platinum Ore`, count = 1, materials = 2),
         HomesteadRefinementRecipe(item = Gw2Ids.`Gold Ore`, count = 2, materials = 1),
         HomesteadRefinementRecipe(item = Gw2Ids.`Silver Ore`, count = 5, materials = 1),
         HomesteadRefinementRecipe(item = Gw2Ids.`Iron Ore`, count = 1, materials = 1),

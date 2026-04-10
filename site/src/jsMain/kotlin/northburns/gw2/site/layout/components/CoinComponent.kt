@@ -4,8 +4,8 @@ import io.kvision.core.Component
 import io.kvision.core.Container
 import io.kvision.html.span
 import io.kvision.panel.SimplePanel
-import northburns.gw2.client.myclient.data.Coins
-import northburns.gw2.client.myclient.data.Coins.Companion.coins
+import northburns.gw2.client.myclient.data.calc.Coins
+import northburns.gw2.client.myclient.data.calc.Coins.Companion.coins
 
 
 class CoinComponent(

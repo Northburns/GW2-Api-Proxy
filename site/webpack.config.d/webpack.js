@@ -1,4 +1,5 @@
 config.resolve.modules.push("kotlin");
+config.resolve.modules.push(("../gw2-client/src/commonMain/resources/players"))
 if (config.devServer) {
     config.devServer.client = {
         overlay: false
@@ -30,5 +31,5 @@ config.resolve.fallback = {
 }
 config.externals = {
     ...config.externals,
-    "better-sqlite3": "better-sqlite3" // kottage
+    //"better-sqlite3": "better-sqlite3" // kottage
 }

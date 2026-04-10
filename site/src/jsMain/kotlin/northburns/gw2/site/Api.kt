@@ -1,46 +1,41 @@
 package northburns.gw2.site
 
-import com.gw2tb.gw2api.types.GW2ItemId
-import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.plugins.sse.*
 import io.ktor.serialization.kotlinx.json.*
-import io.kvision.core.StringPair
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import northburns.gw2.client.myclient.MyGw2Client
-import northburns.gw2.client.myclient.PlayerDataHardCoded
 import northburns.gw2.client.myclient.PlayerId
 import northburns.gw2.client.myclient.cache.MyCacheFactory
-import northburns.gw2.client.myclient.snapshot.AccountSnapshot.AccountSnapshotId
+import northburns.gw2.client.myclient.log.GoonLog
+import northburns.gw2.client.myclient.snapshot.AccountSnapshot.AccountSnapshotMeta
 import northburns.gw2.client.myclient.snapshot.AccountSnapshotService
+import northburns.gw2.client.myclient.snapshot.fromClient
 import northburns.gw2.client.myclient.utils.chunked
-import northburns.gw2.site.state.GoonAction
-import northburns.gw2.site.state.GoonState
-import kotlin.time.Duration.Companion.days
+import northburns.gw2.client2.MyGw2Client2
+import northburns.gw2.site.Gw2GoonManager.goonStore
+import northburns.gw2.site.Gw2GoonManager.playerDataRead
+import northburns.gw2.site.actions.FetchSnapshotIdsSuccess
+import northburns.gw2.site.actions.FetchSnapshotSuccess
 import kotlin.time.Duration.Companion.milliseconds
 
-class Api(scope: CoroutineScope) {
-
-    @OptIn(DelicateCoroutinesApi::class)
-    val client = MyGw2Client.create(scope)
+class Api(private val scope: CoroutineScope) {
 
     val cacheFactory = MyCacheFactory(scope)
 
     @OptIn(DelicateCoroutinesApi::class)
-    val cache = cacheFactory.create<String, JsonElement>(
-        PlayerDataHardCoded.playerData(PlayerId("aki")),
-        "joku-polku-yesssss",
-        1000.days,
-    )
+    //val client = MyGw2Client.create(scope)
+    val client = MyGw2Client2.create(scope, playerDataRead)
+
 
     private val json = Json {
         prettyPrint = true
@@ -62,38 +57,54 @@ class Api(scope: CoroutineScope) {
 
     val snapshotService = AccountSnapshotService(client, cacheFactory, httpClient, json)
 
-    suspend fun getSnapshotIds() = snapshotService.getAccountSnapshotIds(PlayerDataHardCoded.AKI)
-    suspend fun getSnapshot(id: AccountSnapshotId) = snapshotService.getAccountSnapshot(PlayerDataHardCoded.AKI, id)
-    suspend fun isSnapshotInCache(id: AccountSnapshotId) =
-        snapshotService.isSnapshotInCache(PlayerDataHardCoded.AKI, id)
+    suspend fun getSnapshotIds(playerId: PlayerId) = snapshotService.getAccountSnapshotIds(playerId)
 
-
-    suspend fun getCacheStuff(): String {
-        cache.purgeAll()
-        val v = cache.getKnownKeys().joinToString("|")
-        Napier.e(v)
-        return v
-    }
 
     // Actual operations
 
-    private val itemRequestChannel = Channel<GW2ItemId>(Channel.UNLIMITED)
-    private val channels = Gw2GoonManager.launch {
-        itemRequestChannel.consumeAsFlow()
-            .chunked(1_000.milliseconds)
-            .collect { itemIds ->
-                if (itemIds.isNotEmpty()) {
-                    fetchItemsBatch(itemIds.distinct())
+
+    // Old actuals below:
+
+    fun requestSnapshotIds(playerId: PlayerId) = snapshotIdsRequestChannel.request(playerId)
+    fun requestSnapshot(playerId: PlayerId) = snapshotRequestChannel.request(playerId)
+
+    // Private implementation
+
+    private val snapshotIdsRequestChannel = Channel<PlayerId>(Channel.UNLIMITED)
+    private val snapshotRequestChannel = Channel<PlayerId>(Channel.UNLIMITED)
+
+    private fun <T> Channel<T>.handleChunked(collector: suspend (List<T>) -> Unit): Job = Gw2GoonManager.launch {
+        consumeAsFlow()
+            .chunked(2, 1_000.milliseconds)
+            .collect { if (it.isNotEmpty()) collector(it.distinct()) }
+    }
+
+    private val channels = listOf(
+        snapshotIdsRequestChannel.handleChunked { playerIds ->
+            playerIds.forEach { playerId ->
+                val snapshotIds = getSnapshotIds(playerId).associate { (id, ref) ->
+                    id to AccountSnapshotMeta(
+                        id,
+                        ref.creationDate,
+                        ref.creationDate.toString(),
+                    )
                 }
+                goonStore.dispatch(FetchSnapshotIdsSuccess(playerId, snapshotIds))
             }
-    }
+        },
+        snapshotRequestChannel.handleChunked { playerIds ->
+            playerIds.forEach { playerId ->
+                val c = client.auth(playerId)
+                val snap = fromClient(c)
+                goonStore.dispatch(FetchSnapshotSuccess(playerId, snap))
+            }
+        },
+    )
 
-    fun requestItem(itemId: GW2ItemId) {
-        itemRequestChannel.trySend(itemId)
-    }
 
-    private suspend fun fetchItemsBatch(itemIds: List<GW2ItemId>) {
-        val items = client.general.items.getMany(itemIds)
-        Gw2GoonManager.goonStore.dispatch(GoonAction.FetchItemsSuccess(items.values))
+    private fun <T> Channel<T>.request(element: T) {
+        trySend(element).onFailure { GoonLog["Api"].error(it?.message, it) }
     }
 }
+
+

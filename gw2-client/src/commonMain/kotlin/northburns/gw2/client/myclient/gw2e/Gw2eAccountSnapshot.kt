@@ -60,7 +60,7 @@ data class Gw2eAccountSnapshot(
         val account: GW2v2Account,
         val achievements: List<GW2v2AccountAchievement>,
         val bank: List<GW2v2AccountBankSlot?>,
-        val characters: List<Character>,
+        val characters: List<GW2v2Character>,
         val commerce: Commerce,
         /**
          * TODO type
@@ -93,82 +93,6 @@ data class Gw2eAccountSnapshot(
         val titles: List<GW2TitleId>,
         val wallet: List<GW2v2AccountWalletCurrency>,
     ) {
-
-    }
-
-    /**
-     * TODO replace with GW2v2Character
-     *   when https://github.com/GW2ToolBelt/api-generator/issues/543
-     *   and https://github.com/GW2ToolBelt/api-generator/issues/544
-     */
-    @Serializable
-    public data class Character(
-        val name: String,
-        val race: GW2RaceId,
-        val gender: String,
-        val profession: GW2ProfessionId,
-        val level: Long,
-        val guild: GW2GuildId? = null,
-        val age: Long,
-        val created: String,
-        @SerialName("last_modified")
-        val lastModified: String,
-        val deaths: Long,
-        val title: GW2TitleId? = null,
-        @SerialName("wvw_abilities")
-        val wvwAbilities: List<GW2v2Character.WvwAbility>? = null,
-        val flags: List<String>,
-        @SerialName("build_tabs_unlocked")
-        val buildTabsUnlocked: Long,
-        @SerialName("active_build_tab")
-        val activeBuildTab: Long,
-        @SerialName("equipment_tabs_unlocked")
-        val equipmentTabsUnlocked: Long,
-        @SerialName("active_equipment_tab")
-        val activeEquipmentTab: Long,
-        val backstory: List<GW2BackstoryAnswerId>,
-        @SerialName("build_tabs")
-        val buildTabs: List<GW2v2CharactersBuildTab>? = null,
-        val crafting: List<GW2v2Character.Discipline>,
-        val equipment: List<GW2v2Character.EquipmentSlot>? = null,
-        @SerialName("equipment_tabs")
-        val equipmentTabs: List<GW2v2Character.CharactersEquipmentTab>? = null,
-        val bags: List<GW2v2Character.Bag?>? = null,
-        val recipes: List<GW2RecipeId>? = null,
-        val training: List<GW2v2Character.Training>? = null
-    ) {
-        companion object {
-            fun fromApi(c: GW2v2Character): Character {
-                return Character(
-                    name = c.name,
-                    race = c.race,
-                    gender = c.gender,
-                    profession = c.profession,
-                    level = c.level,
-                    guild = c.guild,
-                    age = c.age,
-                    created = c.created,
-                    lastModified = c.lastModified,
-                    deaths = c.deaths,
-                    title = c.title,
-                    wvwAbilities = c.wvwAbilities,
-                    flags = c.flags,
-                    buildTabsUnlocked = c.buildTabsUnlocked,
-                    activeBuildTab = c.activeBuildTab,
-                    equipmentTabsUnlocked = c.equipmentTabsUnlocked,
-                    activeEquipmentTab = c.activeEquipmentTab,
-                    backstory = c.backstory,
-                    buildTabs = c.buildTabs,
-                    crafting = c.crafting,
-                    equipment = c.equipment,
-                    equipmentTabs = c.equipmentTabs,
-                    bags = c.bags,
-                    recipes = c.recipes,
-                    training = c.training,
-                )
-            }
-        }
-
 
     }
 
